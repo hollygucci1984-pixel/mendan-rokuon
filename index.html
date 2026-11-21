@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="面談録音">
+<meta name="theme-color" content="#f6f1e7">
+<meta name="robots" content="noindex,nofollow">
+<title>面談録音</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;
+--bg:light-dark(#f6f1e7,#17201a);--card:light-dark(#fffdf8,#1f2a22);--ink:light-dark(#2f3a32,#e9ecdf);
+--sub:light-dark(#6f786c,#a5ad9f);--line:light-dark(#e4dccb,#34413a);--green:light-dark(#5f8a63,#8fbf8f);
+--green2:light-dark(#dce8d4,#2c3c2f);--beige:light-dark(#ece2cf,#2a3129);--warn:light-dark(#b07a3a,#e0b070)}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 "Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
+padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 48px}
+h1{font-size:22px;margin:8px 0 2px;font-weight:700}
+.lead{color:var(--sub);font-size:13px;margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--sub);margin:0 0 4px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+input[type=text],select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea{min-height:90px;resize:vertical}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.seg button{flex:1 1 auto}
+button{font:inherit;font-size:15px;min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+button.on{background:var(--green);border-color:var(--green);color:#fff}
+button:disabled{opacity:.45}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-top:12px;padding:10px 12px;background:var(--beige);border-radius:12px}
+.consent input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--green);flex:none}
+.stage{display:grid;place-items:center;padding:8px 0 4px;position:relative}
+.ring{width:min(72vw,260px);aspect-ratio:1;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.time{font-size:clamp(34px,10vw,46px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.state{font-size:13px;color:var(--sub);margin-top:6px}
+.rec{width:84px;height:84px;border-radius:50%;border:6px solid var(--green2);background:var(--green);color:#fff;font-size:15px;font-weight:700;margin-top:14px}
+.rec.live{background:#c46b5b;border-color:light-dark(#f0d6cf,#4a2c27);animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.rec.live{animation:none}}
+.ctrls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.note{font-size:13px;color:var(--sub);margin:8px 0 0}
+.warn{color:var(--warn)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tags button{font-size:14px;min-height:40px;padding:6px 12px;background:var(--green2);border-color:transparent}
+.memo{display:flex;gap:8px}.memo input{flex:1}
+ul.marks{list-style:none;padding:0;margin:10px 0 0}
+ul.marks li{display:flex;gap:10px;padding:6px 0;border-top:1px dashed var(--line);font-size:15px}
+ul.marks .t{color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+.live-tx{font-size:14px;color:var(--sub);max-height:140px;overflow:auto;white-space:pre-wrap;margin-top:8px}
+.sess{border-top:1px solid var(--line);padding:12px 0}
+.sess:first-of-type{border-top:0}
+.sess h3{font-size:16px;margin:0}
+.sess .meta{font-size:13px;color:var(--sub)}
+.sess audio{width:100%;margin:8px 0}
+.sess .btns{display:flex;gap:6px;flex-wrap:wrap}
+.sess .btns button{font-size:14px;min-height:40px}
+.empty{color:var(--sub);font-size:14px;text-align:center;padding:12px 0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+h2{font-size:17px;margin:0 0 8px}
+details summary{cursor:pointer;color:var(--sub);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>面談録音</h1>
+  <p class="lead">録音・メモ・文字起こしをまとめて、面談記録づくりへ</p>
+
+  <section class="card" id="setup">
+    <div class="seg" id="kinds">
+      <button data-k="若者就職支援センター" class="on">若者就職支援センター</button>
+      <button data-k="キャリアの対話室">キャリアの対話室</button>
+      <button data-k="ライフコーチング">ライフコーチング</button>
+    </div>
+    <div class="row">
+      <div><label for="client">相談者（イニシャル推奨）</label><input type="text" id="client" placeholder="例：Aさん" autocomplete="off"></div>
+      <div><label for="plan">面談時間</label>
+        <select id="plan"><option value="40">40分</option><option value="50">50分</option><option value="60">60分</option><option value="90">90分</option></select></div>
+    </div>
+    <label class="consent"><input type="checkbox" id="consent"><span>相談者から録音の同意をいただきました</span></label>
+  </section>
+
+  <section class="card">
+    <div class="stage">
+      <div class="ring">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="88" fill="none" stroke="var(--green2)" stroke-width="12"/>
+          <circle id="arc" cx="100" cy="100" r="88" fill="none" stroke="var(--green)" stroke-width="12" stroke-linecap="round" stroke-dasharray="552.9" stroke-dashoffset="552.9"/>
+        </svg>
+        <div class="center"><div><div class="time" id="time">00:00</div><div class="state" id="state">待機中</div></div></div>
+      </div>
+      <button class="rec" id="rec" disabled>録音</button>
+      <div class="ctrls">
+        <button id="pause" disabled>一時停止</button>
+        <button id="txBtn">文字起こし：オフ</button>
+      </div>
+      <p class="note" id="hint">同意にチェックすると録音できます</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>しおり・メモ</h2>
+    <div class="tags" id="tags">
+      <button>主訴</button><button>大事な言葉</button><button>お伝えした事</button><button>宿題</button><button>次回へ</button><button>所感</button>
+    </div>
+    <div class="memo"><input type="text" id="memo" placeholder="ひとことメモ（時刻つきで残ります）" enterkeyhint="done"><button id="addMemo">追加</button></div>
+    <ul class="marks" id="marks"></ul>
+    <div class="live-tx" id="liveTx"></div>
+  </section>
+
+  <section class="card">
+    <h2>保存した面談</h2>
+    <div id="list"><p class="empty">まだありません</p></div>
+    <details style="margin-top:10px"><summary>使い方のヒント</summary>
+      <p class="note">・録音中は画面を開いたままにしてください。画面ロックや他アプリへの切り替えで録音が止まることがあります。<br>
+      ・「記録用にコピー」でメモと文字起こしをまとめてコピーし、Claudeに「面談記録にして」と貼り付けると、センター書式の下書きを作れます。<br>
+      ・「音声を保存」で共有シートから「ファイル」に保存できます。データはこのiPhoneのブラウザの中だけに保存されます。</p>
+    </details>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const fmt=s=>{s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0')};
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let kind='若者就職支援センター';
+let rec=null,stream=null,chunks=[],mime='',startAt=0,elapsed=0,timer=null,paused=false;
+let marks=[],txOn=false,sr=null,txFinal='',wake=null;
+
+/* ---- IndexedDB ---- */
+let dbp=null;
+const db=()=>dbp||(dbp=new Promise((ok,ng)=>{try{const r=indexedDB.open('mendan-rec',1);r.onupgradeneeded=()=>r.result.createObjectStore('s',{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>ng(r.error)}catch(e){ng(e)}}));
+const tx=async(mode,fn)=>{const d=await db();return new Promise((ok,ng)=>{const t=d.transaction('s',mode);const r=fn(t.objectStore('s'));t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>ng(t.error)})};
+const putS=o=>tx('readwrite',s=>s.put(o));
+const allS=()=>tx('readonly',s=>s.getAll());
+const delS=id=>tx('readwrite',s=>s.delete(id));
+
+/* ---- setup ---- */
+document.querySelectorAll('#kinds button').forEach(b=>b.onclick=()=>{if(rec)return;document.querySelectorAll('#kinds button').forEach(x=>x.classList.remove('on'));b.classList.add('on');kind=b.dataset.k;
+  $('#plan').value=kind==='若者就職支援センター'?'40':'60';drawRing()});
+$('#consent').onchange=()=>{if(!rec){$('#rec').disabled=!$('#consent').checked;$('#hint').textContent=$('#consent').checked?'準備ができたら録音をタップ':'同意にチェックすると録音できます'}};
+$('#plan').onchange=()=>drawRing();
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){$('#txBtn').disabled=true;$('#txBtn').textContent='文字起こし：この端末は非対応'}
+$('#txBtn').onclick=()=>{txOn=!txOn;$('#txBtn').textContent='文字起こし：'+(txOn?'オン':'オフ');$('#txBtn').classList.toggle('on',txOn);
+  if(rec&&!paused){txOn?startSR():stopSR()}};
+
+/* ---- ring + timer ---- */
+const now=()=>elapsed+(startAt&&!paused?(performance.now()-startAt)/1000:0);
+function drawRing(){const t=now(),plan=+$('#plan').value*60,p=Math.min(t/plan,1);
+  $('#arc').setAttribute('stroke-dashoffset',552.9*(1-p));
+  $('#arc').setAttribute('stroke',t>=plan-300&&t>0?'var(--warn)':'var(--green)');
+  $('#time').textContent=fmt(t)}
+let warned=false;
+function tick(){drawRing();const plan=+$('#plan').value*60;
+  if(!warned&&now()>=plan-300){warned=true;$('#state').textContent='残り5分です';try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}}}
+
+/* ---- wake lock ---- */
+async function lockOn(){try{if('wakeLock' in navigator)wake=await navigator.wakeLock.request('screen')}catch(e){}}
+function lockOff(){try{wake&&wake.release()}catch(e){}wake=null}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&rec){lockOn();
+  if(rec.state==='inactive'||(stream&&stream.getAudioTracks().some(t=>t.readyState==='ended'))){$('#hint').innerHTML='<span class="warn">画面が切り替わった間に録音が止まった可能性があります。音声を確認してください。</span>'}}});
+
+/* ---- speech ---- */
+function startSR(){if(!SR)return;try{sr=new SR();sr.lang='ja-JP';sr.continuous=true;sr.interimResults=true;
+  sr.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)txFinal+=r[0].transcript+'\n';else interim+=r[0].transcript}
+    const el=$('#liveTx');el.textContent=txFinal.slice(-600)+interim;el.scrollTop=el.scrollHeight};
+  sr.onend=()=>{if(rec&&txOn&&!paused){try{sr.start()}catch(e){}}};
+  sr.onerror=e=>{if(e.error==='not-allowed'){txOn=false;$('#txBtn').textContent='文字起こし：許可されていません';$('#txBtn').classList.remove('on')}};
+  sr.start()}catch(e){}}
+function stopSR(){if(sr){const s=sr;sr=null;s.onend=null;try{s.stop()}catch(e){}}}
+
+/* ---- recording ---- */
+function pickMime(){const c=['audio/mp4','audio/webm;codecs=opus','audio/webm'];for(const m of c){try{if(MediaRecorder.isTypeSupported(m))return m}catch(e){}}return''}
+$('#rec').onclick=async()=>{
+  if(rec){stopRec();return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){$('#hint').innerHTML='<span class="warn">このブラウザでは録音できません。iPhoneのSafariで開いてください。</span>';return}
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}})}
+  catch(e){$('#hint').innerHTML='<span class="warn">マイクが使えません。設定 › Safari › マイク を「許可」にしてください。</span>';return}
+  mime=pickMime();chunks=[];
+  try{rec=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:64000}:undefined)}catch(e){rec=new MediaRecorder(stream)}
+  mime=rec.mimeType||mime||'audio/mp4';
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  rec.onstop=saveRec;
+  rec.start(5000);
+  elapsed=0;startAt=performance.now();paused=false;warned=false;marks=[];txFinal='';renderMarks();$('#liveTx').textContent='';
+  timer=setInterval(tick,500);lockOn();
+  if(txOn)startSR();
+  $('#rec').textContent='終了';$('#rec').classList.add('live');$('#pause').disabled=false;
+  $('#state').textContent='録音中';$('#hint').textContent='画面は開いたままにしてください';
+  document.querySelectorAll('#kinds button,#consent,#plan').forEach(x=>x.disabled=true)};
+$('#pause').onclick=()=>{if(!rec)return;
+  if(!paused){rec.pause();elapsed=now();startAt=0;paused=true;stopSR();$('#pause').textContent='再開';$('#state').textContent='一時停止中';$('#rec').classList.remove('live')}
+  else{rec.resume();startAt=performance.now();paused=false;if(txOn)startSR();$('#pause').textContent='一時停止';$('#state').textContent='録音中';$('#rec').classList.add('live')}};
+function stopRec(){elapsed=now();startAt=0;clearInterval(timer);stopSR();try{rec.stop()}catch(e){saveRec()}
+  stream&&stream.getTracks().forEach(t=>t.stop());lockOff()}
+async function saveRec(){const r=rec;rec=null;if(!r&&!chunks.length)return;
+  const blob=new Blob(chunks,{type:mime});const d=new Date();
+  const o={id:d.getTime(),date:d.toISOString(),kind,client:$('#client').value.trim(),duration:Math.round(elapsed),mime,blob,marks:marks.slice(),transcript:txFinal.trim()};
+  try{await putS(o);toast('保存しました')}catch(e){toast('保存できませんでした。音声を今すぐ保存してください');lastUnsaved=o}
+  $('#rec').textContent='録音';$('#rec').classList.remove('live');$('#pause').disabled=true;$('#pause').textContent='一時停止';
+  $('#state').textContent='待機中';$('#consent').checked=false;$('#rec').disabled=true;$('#hint').textContent='次の面談では、もう一度同意にチェックしてください';
+  document.querySelectorAll('#kinds button,#consent,#plan').forEach(x=>x.disabled=false);
+  elapsed=0;drawRing();render(o)}
+let lastUnsaved=null;
+window.addEventListener('beforeunload',e=>{if(rec){e.preventDefault();e.returnValue=''}});
+
+/* ---- marks ---- */
+function addMark(text){if(!text)return;marks.push({t:Math.round(now()),text});renderMarks()}
+function renderMarks(){$('#marks').innerHTML=marks.map(m=>`<li><span class="t">${fmt(m.t)}</span><span>${esc(m.text)}</span></li>`).join('')}
+document.querySelectorAll('#tags button').forEach(b=>b.onclick=()=>{const v=$('#memo').value.trim();addMark(b.textContent+(v?'：'+v:''));$('#memo').value=''});
+$('#addMemo').onclick=()=>{addMark($('#memo').value.trim());$('#memo').value=''};
+$('#memo').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$('#addMemo').click()}};
+
+/* ---- list ---- */
+const urls=[];
+const ext=m=>m.includes('webm')?'webm':'m4a';
+const title=o=>{const d=new Date(o.date);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}　${o.client||'相談者'}`};
+function recordText(o){const d=new Date(o.date);
+  return `【面談情報】${o.kind}／${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日／${o.client||'相談者'}／録音${fmt(o.duration)}\n\n`+
+  `【しおり・メモ】\n${o.marks.length?o.marks.map(m=>`${fmt(m.t)} ${m.text}`).join('\n'):'（なし）'}\n\n`+
+  `【文字起こし】\n${o.transcript||'（なし）'}`}
+async function render(extra){let items=[];try{items=await allS()}catch(e){}
+  if(extra&&!items.find(x=>x.id===extra.id))items.push(extra);
+  items.sort((a,b)=>b.id-a.id);urls.splice(0).forEach(u=>URL.revokeObjectURL(u));
+  if(!items.length){$('#list').innerHTML='<p class="empty">まだありません</p>';return}
+  $('#list').innerHTML=items.map(o=>{const u=URL.createObjectURL(o.blob);urls.push(u);
+    return `<div class="sess" data-id="${o.id}"><h3>${esc(title(o))}</h3><div class="meta">${esc(o.kind)}・${fmt(o.duration)}・メモ${o.marks.length}件${o.transcript?'・文字起こしあり':''}</div>
+    <audio controls preload="metadata" src="${u}"></audio>
+    <div class="btns"><button data-a="copy">記録用にコピー</button><button data-a="save">音声を保存</button><button data-a="del">削除</button></div></div>`}).join('');
+  $('#list').querySelectorAll('.sess').forEach(el=>{const o=items.find(x=>x.id==el.dataset.id);
+    el.querySelectorAll('button').forEach(b=>b.onclick=async()=>{const a=b.dataset.a;
+      if(a==='copy'){try{await navigator.clipboard.writeText(recordText(o));toast('コピーしました。Claudeに貼り付けてください')}catch(e){toast('コピーできませんでした')}}
+      if(a==='save'){const name=`面談_${title(o).replace(/[\s:/　]+/g,'_')}.${ext(o.mime)}`;const f=new File([o.blob],name,{type:o.mime});
+        try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e.name==='AbortError')return}
+        const a2=document.createElement('a');a2.href=URL.createObjectURL(f);a2.download=name;document.body.appendChild(a2);a2.click();a2.remove()}
+      if(a==='del'){if(b.dataset.sure){try{await delS(o.id)}catch(e){}render();toast('削除しました')}else{b.dataset.sure=1;b.textContent='本当に削除';setTimeout(()=>{b.textContent='削除';delete b.dataset.sure},3000)}}})})}
+drawRing();render();
+}
+</script>
+</body>
+</html>
