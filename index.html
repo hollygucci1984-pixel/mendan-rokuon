@@ -180,7 +180,9 @@ function startSR(){if(!SR)return;try{sr=new SR();sr.lang='ja-JP';sr.continuous=t
   sr.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)txFinal+=r[0].transcript+'\n';else interim+=r[0].transcript}
     const el=$('#liveTx');el.textContent=txFinal.slice(-600)+interim;el.scrollTop=el.scrollHeight};
   sr.onend=()=>{if(rec&&txOn&&!paused){try{sr.start()}catch(e){}}};
-  sr.onerror=e=>{if(e.error==='not-allowed'){txOn=false;$('#txBtn').textContent='文字起こし：許可されていません';$('#txBtn').classList.remove('on')}};
+  sr.onerror=e=>{const why={'not-allowed':'許可されていません','service-not-allowed':'Siriと音声入力がオフです','audio-capture':'録音と同時に使えません','network':'通信できません','no-speech':null,'aborted':null}[e.error];
+    if(why===null)return;txOn=false;const s=sr;sr=null;if(s)s.onend=null;$('#txBtn').textContent='文字起こし：オフ';$('#txBtn').classList.remove('on');
+    $('#hint').innerHTML='<span class="warn">文字起こしが止まりました（'+(why||e.error)+'）。録音はそのまま続いています。</span>'};
   sr.start()}catch(e){}}
 function stopSR(){if(sr){const s=sr;sr=null;s.onend=null;try{s.stop()}catch(e){}}}
 
@@ -188,9 +190,10 @@ function stopSR(){if(sr){const s=sr;sr=null;s.onend=null;try{s.stop()}catch(e){}
 function pickMime(){const c=['audio/mp4','audio/webm;codecs=opus','audio/webm'];for(const m of c){try{if(MediaRecorder.isTypeSupported(m))return m}catch(e){}}return''}
 $('#rec').onclick=async()=>{
   if(rec){stopRec();return}
+  if(txOn)startSR();
   if(!navigator.mediaDevices||!window.MediaRecorder){$('#hint').innerHTML='<span class="warn">このブラウザでは録音できません。iPhoneのSafariで開いてください。</span>';return}
   try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}})}
-  catch(e){$('#hint').innerHTML='<span class="warn">マイクが使えません。設定 › Safari › マイク を「許可」にしてください。</span>';return}
+  catch(e){stopSR();$('#hint').innerHTML='<span class="warn">マイクが使えません。設定 › Safari › マイク を「許可」にしてください。</span>';return}
   mime=pickMime();chunks=[];
   try{rec=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:64000}:undefined)}catch(e){rec=new MediaRecorder(stream)}
   mime=rec.mimeType||mime||'audio/mp4';
@@ -199,7 +202,7 @@ $('#rec').onclick=async()=>{
   rec.start(5000);
   elapsed=0;startAt=performance.now();paused=false;warned=false;marks=[];txFinal='';renderMarks();$('#liveTx').textContent='';
   timer=setInterval(tick,500);lockOn();
-  if(txOn)startSR();
+  if(txOn&&!sr)startSR();
   $('#rec').textContent='終了';$('#rec').classList.add('live');$('#pause').disabled=false;
   $('#state').textContent='録音中';$('#hint').textContent='画面は開いたままにしてください';
   document.querySelectorAll('#kinds button,#consent,#plan').forEach(x=>x.disabled=true)};
